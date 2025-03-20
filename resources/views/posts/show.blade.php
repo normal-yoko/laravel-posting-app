@@ -17,6 +17,8 @@
                <h2 class="card-title fs-5">{{ $post->title }}</h2>
                <p class="card-text">{{ $post->content }}</p>
 
+               <td>{{ $post->updated_at }} </td>
+
                @if ($post->user_id === Auth::id())
                    <div class="d-flex">
                        <a href="{{ route('posts.edit', $post) }}" class="btn btn-outline-primary d-block me-1">編集</a>
