@@ -6,15 +6,20 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use App\Models\Post;
 use App\Http\Requests\PostRequest;
+use Illuminate\Support\Facades\DB;
 
 class PostController extends Controller
 {
     // 一覧ページ
     public function index()
     {
-        $posts = Auth::user()->posts()->orderBy('created_at', 'desc')->get();
+        $posts = Auth::user()->posts()->orderBy('updated_at', 'desc')->get();
 
         return view('posts.index', compact('posts'));
+
+        DB::table('テーブル名')->orderBy('並び替えるカラム名','並び方（ascまたは）desc');
+
+        
     }
 
     // 詳細ページ
@@ -27,11 +32,19 @@ class PostController extends Controller
     public function create()
     {
         return view('posts.create');
+        
     }
 
     // 作成機能
     public function store(PostRequest $request)
     {
+        //バリデーションを設定する
+        $request->validate([
+            'title' => 'required|max:40',
+            'content' => 'required|max:200'
+        ]);
+
+
         $post = new Post();
         $post->title = $request->input('title');
         $post->content = $request->input('content');
@@ -63,5 +76,16 @@ class PostController extends Controller
         $post->save();
 
         return redirect()->route('posts.show', $post)->with('flash_message', '投稿を編集しました。');
+    }
+
+     // 削除機能
+     public function destroy(Post $post) {
+        if ($post->user_id !== Auth::id()) {
+            return redirect()->route('posts.index')->with('error_message', '不正なアクセスです。');
+        }
+
+        $post->delete();
+
+        return redirect()->route('posts.index')->with('flash_message', '投稿を削除しました。');
     }
 }
